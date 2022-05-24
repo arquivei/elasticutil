@@ -8,7 +8,7 @@ import (
 	"github.com/olivere/elastic/v7"
 )
 
-// AllShardsMustReplyOnElasticSearch AllShardsMustReplyOnElasticSearch
+// AllShardsMustReplyOnElasticSearch checks if any shard failed to respond.
 func AllShardsMustReplyOnElasticSearch(
 	results *elastic.SearchResult,
 	err error,
@@ -27,7 +27,7 @@ func AllShardsMustReplyOnElasticSearch(
 	return results, err
 }
 
-// GetErrorFromElasticResponse GetErrorFromElasticResponse
+// GetErrorFromElasticResponse checks if err is an *elastic.Error and returns an error with a formatted message.
 func GetErrorFromElasticResponse(err error) error {
 	switch e := err.(type) {
 	case *elastic.Error:
@@ -49,7 +49,7 @@ func getRootCauseFromElasticError(errorDetails *elastic.ErrorDetails) string {
 	return strings.Join(errors, ": ")
 }
 
-// GetElasticPaginatorFromHits GetElasticPaginatorFromHits
+// GetElasticPaginatorFromHits gets the elastic sort in the last hit as a json string.
 func GetElasticPaginatorFromHits(hits []*elastic.SearchHit) (string, error) {
 	const op errors.Op = "elasticutil.GetElasticPaginatorFromHits"
 
