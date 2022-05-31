@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"bitbucket.org/arquivei/elasticutil"
+	"github.com/arquivei/elasticutil"
 )
 
 type ExampleFilterMust struct {
