@@ -2,6 +2,10 @@ package elasticutil
 
 import "time"
 
+type Ranges interface {
+	time.Time | uint64 | float64
+}
+
 // TimeRange represents a time range with a beginning and an end.
 type TimeRange struct {
 	From time.Time

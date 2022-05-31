@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/arquivei/foundationkit/errors"
 	"github.com/olivere/elastic/v7"
@@ -148,10 +147,10 @@ func getMustQuery(
 			switch ftype.Type.Elem().String() {
 			case "string":
 				queries = append(queries, elastic.NewTermsQuery(names[0],
-					stringsToInterfaces(fvalue.Interface())...))
+					extractSliceFromInterface[string](fvalue.Interface())...))
 			case "uint64":
 				queries = append(queries, elastic.NewTermsQuery(names[0],
-					utin64ToInterfaces(fvalue.Interface())...))
+					extractSliceFromInterface[uint64](fvalue.Interface())...))
 			}
 		case reflect.Bool:
 			queries = append(queries, elastic.NewTermQuery(names[0],
@@ -159,11 +158,11 @@ func getMustQuery(
 		case reflect.Struct:
 			switch v := fvalue.Interface().(type) {
 			case TimeRange:
-				queries = append(queries, getTimeRangeQuery(v.From, v.To, names[0]))
+				queries = append(queries, getRangeQuery(v.From, v.To, names[0]))
 			case FloatRange:
-				queries = append(queries, getFloatRangeQuery(v.From, v.To, names[0]))
+				queries = append(queries, getRangeQuery(v.From, v.To, names[0]))
 			case IntRange:
-				queries = append(queries, getIntRangeQuery(v.From, v.To, names[0]))
+				queries = append(queries, getRangeQuery(v.From, v.To, names[0]))
 			case Nested:
 				var err error
 				queries, err = getMustNestedQuery(ctx, v.payload, names[0], queries)
@@ -363,34 +362,13 @@ func getFullTextSearchMustQuery(
 	return boolQuery, nil
 }
 
-func getIntRangeQuery(from, to uint64, name string) *elastic.RangeQuery {
+func getRangeQuery[T Ranges](from T, to T, name string) *elastic.RangeQuery {
+	var zero T
 	query := elastic.NewRangeQuery(name)
-	if from != 0 {
+	if from != zero {
 		query = query.From(from)
 	}
-	if to != 0 {
-		query = query.To(to)
-	}
-	return query
-}
-
-func getFloatRangeQuery(from, to float64, name string) *elastic.RangeQuery {
-	query := elastic.NewRangeQuery(name)
-	if from != 0 {
-		query = query.From(from)
-	}
-	if to != 0 {
-		query = query.To(to)
-	}
-	return query
-}
-
-func getTimeRangeQuery(from, to time.Time, name string) *elastic.RangeQuery {
-	query := elastic.NewRangeQuery(name)
-	if !from.IsZero() {
-		query = query.From(from)
-	}
-	if !to.IsZero() {
+	if to != zero {
 		query = query.To(to)
 	}
 	return query
@@ -408,23 +386,11 @@ func getMustNestedQuery(
 		return nil, errors.E(op, err)
 	}
 
-	switch len(nestedQuery) {
-	case 0:
-		// do nothing
-	case 1:
-		queries = append(queries,
-			elastic.NewNestedQuery(
-				name,
-				nestedQuery[0],
-			))
-	default:
-		queries = append(queries,
-			elastic.NewNestedQuery(
-				name,
-				elastic.NewBoolQuery().Must(nestedQuery...),
-			))
-	}
-	return queries, nil
+	return appendNestedQuery(
+		name,
+		queries,
+		nestedQuery,
+	), nil
 }
 
 func getExistsNestedQuery(
@@ -439,41 +405,44 @@ func getExistsNestedQuery(
 		return nil, nil, errors.E(op, err)
 	}
 
-	if len(nestedQueryExists) > 0 {
-		switch len(nestedQueryExists) {
-		case 1:
-			existsQueries = append(existsQueries,
-				elastic.NewNestedQuery(
-					name,
-					nestedQueryExists[0],
-				),
-			)
-		default:
-			existsQueries = append(existsQueries,
-				elastic.NewNestedQuery(
-					name,
-					elastic.NewBoolQuery().Must(nestedQueryExists...),
-				))
-		}
-	}
-	if len(nestedQueryNotExists) > 0 {
-		switch len(nestedQueryNotExists) {
-		case 1:
-			notExistsQueries = append(notExistsQueries,
-				elastic.NewNestedQuery(
-					name,
-					nestedQueryNotExists[0],
-				),
-			)
-		default:
-			notExistsQueries = append(notExistsQueries,
-				elastic.NewNestedQuery(
-					name,
-					elastic.NewBoolQuery().Must(nestedQueryNotExists...),
-				))
-		}
-	}
+	existsQueries = appendNestedQuery(
+		name,
+		existsQueries,
+		nestedQueryExists,
+	)
+
+	notExistsQueries = appendNestedQuery(
+		name,
+		notExistsQueries,
+		nestedQueryNotExists,
+	)
+
 	return existsQueries, notExistsQueries, nil
+}
+
+func appendNestedQuery(
+	queryName string,
+	queries []elastic.Query,
+	nestedQuery []elastic.Query,
+) []elastic.Query {
+	if len(nestedQuery) == 0 {
+		return queries
+	}
+
+	if len(nestedQuery) == 1 {
+		return append(queries,
+			elastic.NewNestedQuery(
+				queryName,
+				nestedQuery[0],
+			),
+		)
+	}
+
+	return append(queries,
+		elastic.NewNestedQuery(
+			queryName,
+			elastic.NewBoolQuery().Must(nestedQuery...),
+		))
 }
 
 func parseFieldNames(tag string) []string {
@@ -483,19 +452,10 @@ func parseFieldNames(tag string) []string {
 	return strings.Split(tag, ",")
 }
 
-func stringsToInterfaces(input interface{}) []interface{} {
-	s, _ := input.([]string)
+func extractSliceFromInterface[T any](input interface{}) []interface{} {
+	s, _ := input.([]T)
 	is := make([]interface{}, len(s))
 	for i, v := range s {
-		is[i] = v
-	}
-	return is
-}
-
-func utin64ToInterfaces(input interface{}) []interface{} {
-	u, _ := input.([]uint64)
-	is := make([]interface{}, len(u))
-	for i, v := range u {
 		is[i] = v
 	}
 	return is

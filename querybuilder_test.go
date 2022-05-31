@@ -274,6 +274,30 @@ func Test_BuildElasticBoolQuery(t *testing.T) {
 			expectedQuery: `{"bool":{"must_not":{"range":{"Time":{"from":"1995-03-01T11:35:19.000000029Z","include_lower":true,"include_upper":true,"to":"2019-11-28T15:27:39.000000049Z"}}}}}`,
 		},
 		{
+			name: "[Must Not] One Field (time range, 1 zero)",
+			filter: Filter{
+				MustNot: MockFilterMustNot{
+					Times: &TimeRange{
+						From: time.Time{},
+						To:   time.Date(2019, time.November, 28, 15, 27, 39, 49, time.UTC),
+					},
+				},
+			},
+			expectedQuery: `{"bool":{"must_not":{"range":{"Time":{"from":null,"include_lower":true,"include_upper":true,"to":"2019-11-28T15:27:39.000000049Z"}}}}}`,
+		},
+		{
+			name: "[Must Not] One Field (time range, 2 zeros)",
+			filter: Filter{
+				MustNot: MockFilterMustNot{
+					Times: &TimeRange{
+						From: time.Time{},
+						To:   time.Time{},
+					},
+				},
+			},
+			expectedQuery: `{"bool":{"must_not":{"range":{"Time":{"from":null,"include_lower":true,"include_upper":true,"to":null}}}}}`,
+		},
+		{
 			name: "[Must Not] One Field (int range)",
 			filter: Filter{
 				MustNot: MockFilterMustNot{
@@ -286,6 +310,30 @@ func Test_BuildElasticBoolQuery(t *testing.T) {
 			expectedQuery: `{"bool":{"must_not":{"range":{"Number":{"from":1,"include_lower":true,"include_upper":true,"to":100}}}}}`,
 		},
 		{
+			name: "[Must Not] One Field (int range, 1 zero)",
+			filter: Filter{
+				MustNot: MockFilterMustNot{
+					Numbers: &IntRange{
+						From: 0,
+						To:   100,
+					},
+				},
+			},
+			expectedQuery: `{"bool":{"must_not":{"range":{"Number":{"from":null,"include_lower":true,"include_upper":true,"to":100}}}}}`,
+		},
+		{
+			name: "[Must Not] One Field (int range, 2 zeros)",
+			filter: Filter{
+				MustNot: MockFilterMustNot{
+					Numbers: &IntRange{
+						From: 0,
+						To:   0,
+					},
+				},
+			},
+			expectedQuery: `{"bool":{"must_not":{"range":{"Number":{"from":null,"include_lower":true,"include_upper":true,"to":null}}}}}`,
+		},
+		{
 			name: "[Must Not] One Field (float range)",
 			filter: Filter{
 				MustNot: MockFilterMustNot{
@@ -296,6 +344,30 @@ func Test_BuildElasticBoolQuery(t *testing.T) {
 				},
 			},
 			expectedQuery: `{"bool":{"must_not":{"range":{"Value":{"from":1,"include_lower":true,"include_upper":true,"to":100}}}}}`,
+		},
+		{
+			name: "[Must Not] One Field (float range, 1 zero)",
+			filter: Filter{
+				MustNot: MockFilterMustNot{
+					Values: &FloatRange{
+						From: 0,
+						To:   100.0,
+					},
+				},
+			},
+			expectedQuery: `{"bool":{"must_not":{"range":{"Value":{"from":null,"include_lower":true,"include_upper":true,"to":100}}}}}`,
+		},
+		{
+			name: "[Must Not] One Field (float range, 2 zeros)",
+			filter: Filter{
+				MustNot: MockFilterMustNot{
+					Values: &FloatRange{
+						From: 0.0,
+						To:   0.0,
+					},
+				},
+			},
+			expectedQuery: `{"bool":{"must_not":{"range":{"Value":{"from":null,"include_lower":true,"include_upper":true,"to":null}}}}}`,
 		},
 		{
 			name: "[Must Not] One Field (full text search should multi)",
