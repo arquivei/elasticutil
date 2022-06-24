@@ -3,7 +3,7 @@ module github.com/arquivei/elasticutil
 go 1.18
 
 require (
-	github.com/arquivei/foundationkit v0.2.2
+	github.com/arquivei/foundationkit v0.2.4
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/stretchr/testify v1.7.5
 )
