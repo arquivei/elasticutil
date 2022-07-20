@@ -80,6 +80,8 @@ github.com/arquivei/foundationkit v0.2.4 h1:fByEclgLJl+BTA7wsTivT5kybFXfRsvsJ5bd
 github.com/arquivei/foundationkit v0.2.4/go.mod h1:r5Spva1WE6KgDgqqvjfnSbgCAhlDLOvAdfu8Ca1ANmg=
 github.com/arquivei/foundationkit v0.2.5 h1:1+Ay1lkxTbxvx4qJ3Z6wa6uvh49HFWT10yR3VQk2A70=
 github.com/arquivei/foundationkit v0.2.5/go.mod h1:9HOqHkPoHqVlvv5bpy9kze2z0dpDAC7V4HKyyo19vY0=
+github.com/arquivei/foundationkit v0.2.6 h1:vzD2L4aVG6xKuATXKD7lDIt595zBGHCAgUVjJXEDTIM=
+github.com/arquivei/foundationkit v0.2.6/go.mod h1:649Vo+SYGDMOdex21niMQzY1nU7dc9bb9hi6GamF3Cc=
 github.com/aws/aws-sdk-go v1.37.0/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/aws/aws-sdk-go v1.40.45/go.mod h1:585smgzpB/KqRA+K3y/NL/oYRqQvpNJYvLm+LY1U59Q=
 github.com/aws/aws-sdk-go v1.42.6/go.mod h1:585smgzpB/KqRA+K3y/NL/oYRqQvpNJYvLm+LY1U59Q=
@@ -708,6 +710,8 @@ golang.org/x/sys v0.0.0-20211025201205-69cdffdb9359/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20211116061358-0a5406a5449c/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a h1:dGzPydgVsqGcTRVwiLJ1jVbufYwmzD3LfVPLKsKg+0k=
 golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d h1:Zu/JngovGLVi6t2J3nmAf3AoTDwuzw85YZ3b9o4yU7s=
+golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
