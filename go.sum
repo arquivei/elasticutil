@@ -86,6 +86,8 @@ github.com/arquivei/foundationkit v0.2.7 h1:E0H3+KS+aoZWfgI1iilcJ+s5RohT/ClWDjPL
 github.com/arquivei/foundationkit v0.2.7/go.mod h1:6mC8GOpOqHdi9H/pw6CdY+f8PljNZeOdcJ00RQPqpKU=
 github.com/arquivei/foundationkit v0.2.8 h1:/j3/3h5UKoDTp+hGwM/Mi/9TvBwTkIjnKCJPhB9y7d0=
 github.com/arquivei/foundationkit v0.2.8/go.mod h1:ZQovArnCAcdnL16lvQA1DAtKt3t/GQ6h42Kd/DsNsu8=
+github.com/arquivei/foundationkit v0.2.9 h1:ZbzVRK3B6qwsT4aWcfS33aYJdQe38mYKhcmVbCmlGdE=
+github.com/arquivei/foundationkit v0.2.9/go.mod h1:GfVpLWRUq1OxtXoL7+z33uBfe1g4JSj1eS21t6z8nG4=
 github.com/aws/aws-sdk-go v1.37.0/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/aws/aws-sdk-go v1.40.45/go.mod h1:585smgzpB/KqRA+K3y/NL/oYRqQvpNJYvLm+LY1U59Q=
 github.com/aws/aws-sdk-go v1.42.6/go.mod h1:585smgzpB/KqRA+K3y/NL/oYRqQvpNJYvLm+LY1U59Q=
