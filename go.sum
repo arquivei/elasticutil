@@ -90,6 +90,8 @@ github.com/arquivei/foundationkit v0.2.9 h1:ZbzVRK3B6qwsT4aWcfS33aYJdQe38mYKhcmV
 github.com/arquivei/foundationkit v0.2.9/go.mod h1:GfVpLWRUq1OxtXoL7+z33uBfe1g4JSj1eS21t6z8nG4=
 github.com/arquivei/foundationkit v0.2.10 h1:Xlsu4bXXHL43ZekTSy/8ps8dJUC1shwRpsJE5zfsKgs=
 github.com/arquivei/foundationkit v0.2.10/go.mod h1:4EP4HbaeRHwIdR0Qm0USbhyB7SK4Rx7EIOHsL8r0MvA=
+github.com/arquivei/foundationkit v0.3.0 h1:QHzvnTZABhpOvV/lPNUrUlP4WiwQu7TxScBlfxkmKI4=
+github.com/arquivei/foundationkit v0.3.0/go.mod h1:fPcfkF7gX4yIudcSUFIe0KM8Gs2oVnKOtP+vqRVEQjc=
 github.com/aws/aws-sdk-go v1.37.0/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/aws/aws-sdk-go v1.40.45/go.mod h1:585smgzpB/KqRA+K3y/NL/oYRqQvpNJYvLm+LY1U59Q=
 github.com/aws/aws-sdk-go v1.42.6/go.mod h1:585smgzpB/KqRA+K3y/NL/oYRqQvpNJYvLm+LY1U59Q=
@@ -730,6 +732,8 @@ golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 h1:WIoqL4EROvwiPdUtaip4VcDdp
 golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.1.0 h1:kunALQeHf1/185U1i0GOB/fy1IPRDDpuoOOqRReG57U=
 golang.org/x/sys v0.1.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.2.0 h1:ljd4t30dBnAvMZaQCevtY0xLLD0A+bRZXbgLMLU1F/A=
+golang.org/x/sys v0.2.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
