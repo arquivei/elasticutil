@@ -1,4 +1,4 @@
-// nolint
+//nolint
 package elasticutil
 
 import (
@@ -197,6 +197,17 @@ func Test_BuildElasticBoolQuery(t *testing.T) {
 				},
 			},
 			expectedQuery: `{"bool":{"must":[{"terms":{"String":["1","2"]}},{"terms":{"Int":[1,2]}},{"term":{"Bool":true}},{"nested":{"path":"MultiNestedField","query":{"bool":{"must":[{"term":{"MultiNested.Bool":true}},{"terms":{"MultiNested.Slice":["1","2"]}},{"range":{"MultiNested.Range":{"from":"1995-03-01T11:35:19.000000029Z","include_lower":true,"include_upper":true,"to":"2019-11-28T15:27:39.000000049Z"}}}]}}}},{"nested":{"path":"SingleNestedField","query":{"terms":{"SingleNested.Slice":["1","2"]}}}},{"range":{"Time":{"from":"1995-03-01T11:35:19.000000029Z","include_lower":true,"include_upper":true,"to":"2019-11-28T15:27:39.000000049Z"}}},{"range":{"Number":{"from":1,"include_lower":true,"include_upper":true,"to":100}}},{"range":{"Value":{"from":1,"include_lower":true,"include_upper":true,"to":100}}},{"bool":{"should":[{"multi_match":{"fields":["MultiShould1","MultiShould2","MultiShould3"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["MultiShould1","MultiShould2","MultiShould3"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"should":[{"multi_match":{"fields":["SingleShould1"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["SingleShould1"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"must":[{"multi_match":{"fields":["MultiMust1","MultiMust2","MultiMust3"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["MultiMust1","MultiMust2","MultiMust3"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"must":[{"multi_match":{"fields":["SingleMust1"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["SingleMust1"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}}]}}`,
+		},
+		{
+			name: "[Must] Custom query",
+			filter: Filter{
+				Must: MockFilterMust{
+					Custom: NewCustomSearch(func() (*elastic.BoolQuery, error) {
+						return elastic.NewBoolQuery().Must(elastic.NewMatchQuery("Strings", "1")), nil
+					}),
+				},
+			},
+			expectedQuery: `{"bool":{"must":{"match":{"Strings":{"query":"1"}}}}}`,
 		},
 		{
 			name: "[Must Not] One Field (slice string)",
@@ -620,6 +631,17 @@ func Test_BuildElasticBoolQuery(t *testing.T) {
 			expectedError: `elasticutil.BuildElasticBoolQuery: getExistsQuery: [NotSupportedType] is of unknown type: int`,
 		},
 		{
+			name: "[Error] Custom query",
+			filter: Filter{
+				Must: MockFilterMust{
+					Custom: NewCustomSearch(func() (*elastic.BoolQuery, error) {
+						return nil, errors.New("custom error")
+					}),
+				},
+			},
+			expectedError: `elasticutil.BuildElasticBoolQuery: getMustQuery: custom error`,
+		},
+		{
 			name: "All filters",
 			filter: Filter{
 				Must: MockFilterMust{
@@ -653,6 +675,9 @@ func Test_BuildElasticBoolQuery(t *testing.T) {
 					SingleShould: NewFullTextSearchShould([]string{"1", "2"}),
 					MultiMust:    NewFullTextSearchMust([]string{"1", "2"}),
 					SingleMust:   NewFullTextSearchMust([]string{"1", "2"}),
+					Custom: NewCustomSearch(func() (*elastic.BoolQuery, error) {
+						return elastic.NewBoolQuery().Must(elastic.NewMatchQuery("Strings", "1")), nil
+					}),
 				},
 				MustNot: MockFilterMustNot{
 					Strings: []string{"1", "2"},
@@ -698,7 +723,7 @@ func Test_BuildElasticBoolQuery(t *testing.T) {
 					}),
 				},
 			},
-			expectedQuery: `{"bool":{"must":[{"terms":{"String":["1","2"]}},{"terms":{"Int":[1,2]}},{"term":{"Bool":true}},{"nested":{"path":"MultiNestedField","query":{"bool":{"must":[{"term":{"MultiNested.Bool":true}},{"terms":{"MultiNested.Slice":["1","2"]}},{"range":{"MultiNested.Range":{"from":"1995-03-01T11:35:19.000000029Z","include_lower":true,"include_upper":true,"to":"2019-11-28T15:27:39.000000049Z"}}}]}}}},{"nested":{"path":"SingleNestedField","query":{"terms":{"SingleNested.Slice":["1","2"]}}}},{"range":{"Time":{"from":"1995-03-01T11:35:19.000000029Z","include_lower":true,"include_upper":true,"to":"2019-11-28T15:27:39.000000049Z"}}},{"range":{"Number":{"from":1,"include_lower":true,"include_upper":true,"to":100}}},{"range":{"Value":{"from":1,"include_lower":true,"include_upper":true,"to":100}}},{"bool":{"should":[{"multi_match":{"fields":["MultiShould1","MultiShould2","MultiShould3"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["MultiShould1","MultiShould2","MultiShould3"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"should":[{"multi_match":{"fields":["SingleShould1"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["SingleShould1"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"must":[{"multi_match":{"fields":["MultiMust1","MultiMust2","MultiMust3"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["MultiMust1","MultiMust2","MultiMust3"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"must":[{"multi_match":{"fields":["SingleMust1"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["SingleMust1"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"nested":{"path":"MultiNested","query":{"exists":{"field":"MultiNested.Bool2"}}}},{"nested":{"path":"SingleNested","query":{"exists":{"field":"SingleNested.Bool"}}}},{"exists":{"field":"Bool1"}}],"must_not":[{"terms":{"String":["1","2"]}},{"terms":{"Int":[1,2]}},{"term":{"Bool":true}},{"nested":{"path":"MultiNestedField","query":{"bool":{"must":[{"term":{"MultiNested.Bool":true}},{"terms":{"MultiNested.Slice":["1","2"]}},{"range":{"MultiNested.Range":{"from":"1995-03-01T11:35:19.000000029Z","include_lower":true,"include_upper":true,"to":"2019-11-28T15:27:39.000000049Z"}}}]}}}},{"nested":{"path":"SingleNestedField","query":{"terms":{"SingleNested.Slice":["1","2"]}}}},{"range":{"Time":{"from":"1995-03-01T11:35:19.000000029Z","include_lower":true,"include_upper":true,"to":"2019-11-28T15:27:39.000000049Z"}}},{"range":{"Number":{"from":1,"include_lower":true,"include_upper":true,"to":100}}},{"range":{"Value":{"from":1,"include_lower":true,"include_upper":true,"to":100}}},{"bool":{"should":[{"multi_match":{"fields":["MultiShould1","MultiShould2","MultiShould3"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["MultiShould1","MultiShould2","MultiShould3"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"should":[{"multi_match":{"fields":["SingleShould1"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["SingleShould1"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"must":[{"multi_match":{"fields":["MultiMust1","MultiMust2","MultiMust3"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["MultiMust1","MultiMust2","MultiMust3"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"must":[{"multi_match":{"fields":["SingleMust1"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["SingleMust1"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"nested":{"path":"MultiNested","query":{"exists":{"field":"MultiNested.Bool1"}}}},{"exists":{"field":"Bool2"}}]}}`,
+			expectedQuery: `{"bool":{"must":[{"terms":{"String":["1","2"]}},{"terms":{"Int":[1,2]}},{"term":{"Bool":true}},{"nested":{"path":"MultiNestedField","query":{"bool":{"must":[{"term":{"MultiNested.Bool":true}},{"terms":{"MultiNested.Slice":["1","2"]}},{"range":{"MultiNested.Range":{"from":"1995-03-01T11:35:19.000000029Z","include_lower":true,"include_upper":true,"to":"2019-11-28T15:27:39.000000049Z"}}}]}}}},{"nested":{"path":"SingleNestedField","query":{"terms":{"SingleNested.Slice":["1","2"]}}}},{"range":{"Time":{"from":"1995-03-01T11:35:19.000000029Z","include_lower":true,"include_upper":true,"to":"2019-11-28T15:27:39.000000049Z"}}},{"range":{"Number":{"from":1,"include_lower":true,"include_upper":true,"to":100}}},{"range":{"Value":{"from":1,"include_lower":true,"include_upper":true,"to":100}}},{"bool":{"should":[{"multi_match":{"fields":["MultiShould1","MultiShould2","MultiShould3"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["MultiShould1","MultiShould2","MultiShould3"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"should":[{"multi_match":{"fields":["SingleShould1"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["SingleShould1"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"must":[{"multi_match":{"fields":["MultiMust1","MultiMust2","MultiMust3"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["MultiMust1","MultiMust2","MultiMust3"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"must":[{"multi_match":{"fields":["SingleMust1"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["SingleMust1"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"must":{"match":{"Strings":{"query":"1"}}}}},{"nested":{"path":"MultiNested","query":{"exists":{"field":"MultiNested.Bool2"}}}},{"nested":{"path":"SingleNested","query":{"exists":{"field":"SingleNested.Bool"}}}},{"exists":{"field":"Bool1"}}],"must_not":[{"terms":{"String":["1","2"]}},{"terms":{"Int":[1,2]}},{"term":{"Bool":true}},{"nested":{"path":"MultiNestedField","query":{"bool":{"must":[{"term":{"MultiNested.Bool":true}},{"terms":{"MultiNested.Slice":["1","2"]}},{"range":{"MultiNested.Range":{"from":"1995-03-01T11:35:19.000000029Z","include_lower":true,"include_upper":true,"to":"2019-11-28T15:27:39.000000049Z"}}}]}}}},{"nested":{"path":"SingleNestedField","query":{"terms":{"SingleNested.Slice":["1","2"]}}}},{"range":{"Time":{"from":"1995-03-01T11:35:19.000000029Z","include_lower":true,"include_upper":true,"to":"2019-11-28T15:27:39.000000049Z"}}},{"range":{"Number":{"from":1,"include_lower":true,"include_upper":true,"to":100}}},{"range":{"Value":{"from":1,"include_lower":true,"include_upper":true,"to":100}}},{"bool":{"should":[{"multi_match":{"fields":["MultiShould1","MultiShould2","MultiShould3"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["MultiShould1","MultiShould2","MultiShould3"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"should":[{"multi_match":{"fields":["SingleShould1"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["SingleShould1"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"must":[{"multi_match":{"fields":["MultiMust1","MultiMust2","MultiMust3"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["MultiMust1","MultiMust2","MultiMust3"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"bool":{"must":[{"multi_match":{"fields":["SingleMust1"],"max_expansions":1024,"query":"1","type":"phrase_prefix"}},{"multi_match":{"fields":["SingleMust1"],"max_expansions":1024,"query":"2","type":"phrase_prefix"}}]}},{"nested":{"path":"MultiNested","query":{"exists":{"field":"MultiNested.Bool1"}}}},{"exists":{"field":"Bool2"}}]}}`,
 		},
 	}
 
@@ -779,7 +804,10 @@ type MockFilterMust struct {
 	SingleShould FullTextSearchShould `es:"SingleShould1"`
 	MultiMust    FullTextSearchMust   `es:"MultiMust1,MultiMust2,MultiMust3"`
 	SingleMust   FullTextSearchMust   `es:"SingleMust1"`
+	Custom       CustomSearch         `es:"Custom"`
 }
+
+type MockCustomQuery struct{}
 
 type MockFilterMustNot struct {
 	Strings []string `es:"String"`

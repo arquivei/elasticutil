@@ -99,7 +99,7 @@ func MarshalQuery(query elastic.Query) string {
 	return ""
 }
 
-// nolint: funlen, cyclop, gocognit
+//nolint: funlen, cyclop, gocognit
 func getMustQuery(
 	ctx context.Context,
 	filter interface{},
@@ -189,6 +189,12 @@ func getMustQuery(
 					return nil, errors.E(op, err)
 				}
 				queries = append(queries, boolQuery)
+			case CustomSearch:
+				boolQuery, err := v.GetQuery()
+				if err != nil {
+					return nil, errors.E(op, err)
+				}
+				queries = append(queries, boolQuery)
 			default:
 				return nil, errors.E(op, structNotSupportedError(names[0]))
 			}
@@ -200,7 +206,7 @@ func getMustQuery(
 	return queries, nil
 }
 
-// nolint: funlen, cyclop
+//nolint: funlen, cyclop
 func getExistsQuery(
 	filter interface{},
 ) (existsQueries, notExistsQueries []elastic.Query, err error) {
