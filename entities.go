@@ -1,6 +1,10 @@
 package elasticutil
 
-import "time"
+import (
+	"time"
+
+	"github.com/olivere/elastic/v7"
+)
 
 type Ranges interface {
 	time.Time | uint64 | float64
@@ -52,4 +56,17 @@ type FullTextSearchShould struct {
 // NewFullTextSearchShould creates a FullTextSearchShould struct with the given payload.
 func NewFullTextSearchShould(payload interface{}) FullTextSearchShould {
 	return FullTextSearchShould{payload}
+}
+
+// CustomSearch is the struct that contains the CustomQuery function.
+type CustomSearch struct {
+	GetQuery CustomQuery
+}
+
+// CustomQuery is the type function that will return the custom query.
+type CustomQuery func() (*elastic.BoolQuery, error)
+
+// NewCustomSearch creates a CustomSearch struct with the given CustomQuery function.
+func NewCustomSearch(query CustomQuery) CustomSearch {
+	return CustomSearch{query}
 }

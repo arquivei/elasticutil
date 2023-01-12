@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/arquivei/elasticutil"
+	"github.com/olivere/elastic/v7"
 )
 
 type ExampleFilterMust struct {
@@ -17,6 +18,7 @@ type ExampleFilterMust struct {
 	AgeRange         *elasticutil.IntRange            `es:"Age"`
 	CovidInfo        elasticutil.Nested               `es:"Covid"`
 	NameOrSocialName elasticutil.FullTextSearchShould `es:"Name,SocialName"`
+	MyCustomSearch   elasticutil.CustomSearch
 }
 
 type ExampleFilterExists struct {
@@ -54,6 +56,9 @@ func main() {
 				To:   30,
 			},
 			NameOrSocialName: elasticutil.NewFullTextSearchShould([]string{"John", "Mary", "Rebecca"}),
+			MyCustomSearch: elasticutil.NewCustomSearch(func() (*elastic.BoolQuery, error) {
+				return elastic.NewBoolQuery().Must(elastic.NewMatchQuery("Name", "John")), nil
+			}),
 		},
 		MustNot: ExampleFilterMust{
 			Names: []string{"Lary"},
@@ -90,155 +95,166 @@ func refBool(b bool) *bool {
 Expected output:
 
 {
-    "bool": {
-        "must": [
-            {
-                "terms": {
-                    "Name": [
-                        "John",
-                        "Mary"
+  "bool": {
+    "must": [
+      {
+        "terms": {
+          "Name": [
+            "John",
+            "Mary"
+          ]
+        }
+      },
+      {
+        "terms": {
+          "Age": [
+            16,
+            17,
+            18,
+            25,
+            26
+          ]
+        }
+      },
+      {
+        "term": {
+          "HasCovid": true
+        }
+      },
+      {
+        "range": {
+          "CreatedAt": {
+            "from": "2020-11-28T15:27:39.000000049Z",
+            "include_lower": true,
+            "include_upper": true,
+            "to": "2021-11-28T15:27:39.000000049Z"
+          }
+        }
+      },
+      {
+        "range": {
+          "Age": {
+            "from": 15,
+            "include_lower": true,
+            "include_upper": true,
+            "to": 30
+          }
+        }
+      },
+      {
+        "nested": {
+          "path": "Covid",
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "terms": {
+                    "Covid.Symptom": [
+                      "cough"
                     ]
-                }
-            },
-            {
-                "terms": {
-                    "Age": [
-                        16,
-                        17,
-                        18,
-                        25,
-                        26
-                    ]
-                }
-            },
-            {
-                "term": {
-                    "HasCovid": true
-                }
-            },
-            {
-                "range": {
-                    "CreatedAt": {
-                        "from": "2020-11-28T15:27:39.000000049Z",
-                        "include_lower": true,
-                        "include_upper": true,
-                        "to": "2021-11-28T15:27:39.000000049Z"
+                  }
+                },
+                {
+                  "range": {
+                    "Covid.Date": {
+                      "from": "2019-11-28T15:27:39.000000049Z",
+                      "include_lower": true,
+                      "include_upper": true,
+                      "to": "2020-11-28T15:27:39.000000049Z"
                     }
+                  }
                 }
-            },
-            {
-                "range": {
-                    "Age": {
-                        "from": 15,
-                        "include_lower": true,
-                        "include_upper": true,
-                        "to": 30
-                    }
-                }
-            },
-            {
-                "nested": {
-                    "path": "Covid",
-                    "query": {
-                        "bool": {
-                            "must": [
-                                {
-                                    "terms": {
-                                        "Covid.Symptom": [
-                                            "cough"
-                                        ]
-                                    }
-                                },
-                                {
-                                    "range": {
-                                        "Covid.Date": {
-                                            "from": "2019-11-28T15:27:39.000000049Z",
-                                            "include_lower": true,
-                                            "include_upper": true,
-                                            "to": "2020-11-28T15:27:39.000000049Z"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
-            {
-                "bool": {
-                    "should": [
-                        {
-                            "multi_match": {
-                                "fields": [
-                                    "Name",
-                                    "SocialName"
-                                ],
-                                "max_expansions": 1024,
-                                "query": "John",
-                                "type": "phrase_prefix"
-                            }
-                        },
-                        {
-                            "multi_match": {
-                                "fields": [
-                                    "Name",
-                                    "SocialName"
-                                ],
-                                "max_expansions": 1024,
-                                "query": "Mary",
-                                "type": "phrase_prefix"
-                            }
-                        },
-                        {
-                            "multi_match": {
-                                "fields": [
-                                    "Name",
-                                    "SocialName"
-                                ],
-                                "max_expansions": 1024,
-                                "query": "Rebecca",
-                                "type": "phrase_prefix"
-                            }
-                        }
-                    ]
-                }
-            },
-            {
-                "nested": {
-                    "path": "Covid",
-                    "query": {
-                        "exists": {
-                            "field": "Covid"
-                        }
-                    }
-                }
-            },
-            {
-                "exists": {
-                    "field": "Age"
-                }
+              ]
             }
-        ],
-        "must_not": [
+          }
+        }
+      },
+      {
+        "bool": {
+          "should": [
             {
-                "terms": {
-                    "Name": [
-                        "Lary"
-                    ]
-                }
+              "multi_match": {
+                "fields": [
+                  "Name",
+                  "SocialName"
+                ],
+                "max_expansions": 1024,
+                "query": "John",
+                "type": "phrase_prefix"
+              }
             },
             {
-                "range": {
-                    "Age": {
-                        "from": 29,
-                        "include_lower": true,
-                        "include_upper": true,
-                        "to": 30
-                    }
-                }
+              "multi_match": {
+                "fields": [
+                  "Name",
+                  "SocialName"
+                ],
+                "max_expansions": 1024,
+                "query": "Mary",
+                "type": "phrase_prefix"
+              }
+            },
+            {
+              "multi_match": {
+                "fields": [
+                  "Name",
+                  "SocialName"
+                ],
+                "max_expansions": 1024,
+                "query": "Rebecca",
+                "type": "phrase_prefix"
+              }
             }
-        ]
-    }
+          ]
+        }
+      },
+      {
+        "bool": {
+          "must": {
+            "match": {
+              "Name": {
+                "query": "John"
+              }
+            }
+          }
+        }
+      },
+      {
+        "nested": {
+          "path": "Covid",
+          "query": {
+            "exists": {
+              "field": "Covid"
+            }
+          }
+        }
+      },
+      {
+        "exists": {
+          "field": "Age"
+        }
+      }
+    ],
+    "must_not": [
+      {
+        "terms": {
+          "Name": [
+            "Lary"
+          ]
+        }
+      },
+      {
+        "range": {
+          "Age": {
+            "from": 29,
+            "include_lower": true,
+            "include_upper": true,
+            "to": 30
+          }
+        }
+      }
+    ]
+  }
 }
 
 */
