@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/arquivei/foundationkit v0.3.3
 	github.com/olivere/elastic/v7 v7.0.32
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
 )
 
 require (
