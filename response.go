@@ -28,7 +28,7 @@ func AllShardsMustReplyOnElasticSearch(
 }
 
 // GetErrorFromElasticResponse checks if err is an *elastic.Error and returns an error with a formatted message.
-//nolint: gocritic, errorlint
+// nolint: gocritic, errorlint
 func GetErrorFromElasticResponse(err error) error {
 	switch e := err.(type) {
 	case *elastic.Error:
