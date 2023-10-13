@@ -24,8 +24,8 @@ ElasticUtil is a generic library that assists in the use of Elasticsearch, using
 
 | **Stack**     | **Version** |
 |---------------|-------------|
-| Golang        | v1.18       |
-| golangci-lint | v1.46.2     |
+| Golang        | v1.21.3       |
+| golangci-lint | v1.54.2     |
 
 ## <a name="GettingStarted" /> 3. Getting Started
 
