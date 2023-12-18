@@ -70,3 +70,13 @@ type CustomQuery func() (*elastic.BoolQuery, error)
 func NewCustomSearch(query CustomQuery) CustomSearch {
 	return CustomSearch{query}
 }
+
+// MultiMatchSearchShould Represents a Should's Multi Match Search.
+type MultiMatchSearchShould struct {
+	payload interface{}
+}
+
+// NewMultiMatchSearchShould creates a MultiMatchSearchShould struct with the given payload.
+func NewMultiMatchSearchShould(payload interface{}) MultiMatchSearchShould {
+	return MultiMatchSearchShould{payload}
+}

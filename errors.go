@@ -21,3 +21,7 @@ func typeNotSupportedError(name, t string) error {
 func fullTextSearchTypeNotSupported(name string) error {
 	return errors.New("[" + name + "] full text search value is not supported")
 }
+
+func multiMatchSearchTypeNotSupported(name string) error {
+	return errors.New("[" + name + "] multi match search value is not supported")
+}
