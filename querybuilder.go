@@ -189,6 +189,16 @@ func getMustQuery(
 					return nil, errors.E(op, err)
 				}
 				queries = append(queries, boolQuery)
+			case MultiMatchSearchShould:
+				boolQuery, err := getMultiMatchSearchShouldQuery(
+					v.payload,
+					structFieldName,
+					names,
+				)
+				if err != nil {
+					return nil, errors.E(op, err)
+				}
+				queries = append(queries, boolQuery)
 			case CustomSearch:
 				boolQuery, err := v.GetQuery()
 				if err != nil {
@@ -362,6 +372,29 @@ func getFullTextSearchMustQuery(
 		boolQuery.Must(
 			elastic.NewMultiMatchQuery(content, names...).
 				Type("phrase_prefix").
+				MaxExpansions(maxExpansions),
+		)
+	}
+	return boolQuery, nil
+}
+
+func getMultiMatchSearchShouldQuery(
+	payload interface{},
+	structName string,
+	names []string,
+) (*elastic.BoolQuery, error) {
+	const op = errors.Op("getMultiMatchSearchShouldQuery")
+	contents, ok := payload.([]string)
+	if !ok {
+		return nil, errors.E(op,
+			multiMatchSearchTypeNotSupported(structName))
+	}
+
+	boolQuery := elastic.NewBoolQuery()
+	for _, content := range contents {
+		boolQuery.Should(
+			elastic.NewMultiMatchQuery(content, names...).
+				Type("best_fields"). // default, but we explicitly specify this choice
 				MaxExpansions(maxExpansions),
 		)
 	}
