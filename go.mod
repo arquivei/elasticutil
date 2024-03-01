@@ -5,9 +5,9 @@ go 1.21
 toolchain go1.21.3
 
 require (
-	github.com/arquivei/foundationkit v0.4.2
+	github.com/arquivei/foundationkit v0.6.1
 	github.com/olivere/elastic/v7 v7.0.32
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
@@ -19,6 +19,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rs/zerolog v1.31.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
