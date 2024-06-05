@@ -18,7 +18,7 @@
 
 ## <a name="Description" /> 1. Description
 
-ElasticUtil is a generic library that assists in the use of Elasticsearch, using olivere/elastic library. It is possible to create olivere/elastic's queries using only one struct. It is also possible to translate errors and responses.
+ElasticUtil is a generic library that assists in the use of Elasticsearch, using olivere/elastic library and the offical library. It is possible to create elastic's queries using only one struct. It is also possible to translate errors and responses.
 
 ## <a name="TechnologyStack" /> 2. Technology Stack
 
@@ -46,111 +46,11 @@ ElasticUtil is a generic library that assists in the use of Elasticsearch, using
   go mod tidy
   ```
 
-- ### <a name="Usage" /> Usage
-  
-  - Import the package
-
-    ```go
-    import (
-        "github.com/arquivei/elasticutil"
-    )
-    ```
-
-  - Define a filter struct 
-
-    ```go
-    type ExampleFilterMust struct {
-      Names            []string `es:"Name"`
-      SocialNames      []string `es:"SocialName"`
-      Ages             []uint64 `es:"Age"`
-      HasCovid         *bool
-      CreatedAt        *elasticutil.TimeRange
-      AgeRange         *elasticutil.IntRange            `es:"Age"`
-      CovidInfo        elasticutil.Nested               `es:"Covid"`
-      NameOrSocialName elasticutil.FullTextSearchShould `es:"Name,SocialName"`
-    }
-
-    type ExampleFilterExists struct {
-      HasCovidInfo elasticutil.Nested `es:"Covid"`
-      HasAge       *bool              `es:"Age"`
-    }
-
-    type ExampleCovidInfo struct {
-      HasCovidInfo     *bool                  `es:"Covid"`
-      Symptoms         []string               `es:"Covid.Symptom"`
-      FirstSymptomDate *elasticutil.TimeRange `es:"Covid.Date"`
-    }
-    ```
-  
-  - And now, it's time!
-
-    ```go
-    requestFilter := elasticutil.Filter{
-      Must: ExampleFilterMust{
-        Names:    []string{"John", "Mary"},
-        Ages:     []uint64{16, 17, 18, 25, 26},
-        HasCovid: refBool(true),
-        CovidInfo: elasticutil.NewNested(
-          ExampleCovidInfo{
-            Symptoms: []string{"cough"},
-            FirstSymptomDate: &elasticutil.TimeRange{
-              From: time.Date(2019, time.November, 28, 15, 27, 39, 49, time.UTC),
-              To:   time.Date(2020, time.November, 28, 15, 27, 39, 49, time.UTC),
-            },
-          },
-        ),
-        CreatedAt: &elasticutil.TimeRange{
-          From: time.Date(2020, time.November, 28, 15, 27, 39, 49, time.UTC),
-          To:   time.Date(2021, time.November, 28, 15, 27, 39, 49, time.UTC),
-        },
-        AgeRange: &elasticutil.IntRange{
-          From: 15,
-          To:   30,
-        },
-        NameOrSocialName: elasticutil.NewFullTextSearchShould([]string{"John", "Mary", "Rebecca"}),
-      },
-      MustNot: ExampleFilterMust{
-        Names: []string{"Lary"},
-        AgeRange: &elasticutil.IntRange{
-          From: 29,
-          To:   30,
-        },
-      },
-      Exists: ExampleFilterExists{
-        HasCovidInfo: elasticutil.NewNested(
-          ExampleCovidInfo{
-            HasCovidInfo: refBool(true),
-          },
-        ),
-        HasAge: refBool(true),
-      },
-    }
-
-    // BuildElasticBoolQuery builds a olivere/elastic's query based on Filter.
-    elasticQuery, err := elasticutil.BuildElasticBoolQuery(context.Background(), requestFilter)
-    if err != nil {
-      panic(err)
-    }
-
-    // MarshalQuery transforms a olivere/elastic's query in a string for log and test
-    // purpose.
-    verboseElasticQuery := elasticutil.MarshalQuery(elasticQuery)
-
-    fmt.Println(verboseElasticQuery)
-    ```
-
 - ### <a name="Examples" /> Examples
   
-  - [Sample usage](https://github.com/arquivei/elasticutil/blob/master/examples/main.go)
+  - [Olivere](https://github.com/arquivei/elasticutil/blob/master/examples/olivere/main.go)
 
-## <a name="Changelog" /> 4. Changelog
-
-  - **ElasticUtil 0.1.0 (May 27, 2022)**
-  
-    - [New] Decoupling this package from Arquivei's API projects.
-    - [New] Setting github's workflow with golangci-lint 
-    - [New] Example for usage.
-    - [New] Documents: Code of Conduct, Contributing, License and Readme.
+  - [Official library](https://github.com/arquivei/elasticutil/blob/master/examples/official/main.go)
 
 ## <a name="Collaborators" /> 5. Collaborators
 
