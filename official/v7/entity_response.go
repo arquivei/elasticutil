@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/arquivei/foundationkit/errors"
-	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"github.com/elastic/go-elasticsearch/v8/esapi"
 )
 
 // SearchResponse represents the response for Search method.
