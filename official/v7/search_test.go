@@ -10,7 +10,7 @@ import (
 
 	"github.com/arquivei/foundationkit/errors"
 	"github.com/arquivei/foundationkit/ref"
-	es "github.com/elastic/go-elasticsearch/v7"
+	es "github.com/elastic/go-elasticsearch/v8"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
