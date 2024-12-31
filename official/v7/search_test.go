@@ -154,7 +154,6 @@ func Test_Search(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 			assert.NotPanics(t, func() {
@@ -226,7 +225,7 @@ func getMockFilter() Filter {
 		Must: ExampleFilterMust{
 			Names:    []string{"John", "Mary"},
 			Ages:     []uint64{16, 17, 18, 25, 26},
-			HasCovid: ref.Bool(true),
+			HasCovid: ref.Of(true),
 			CovidInfo: NewNested(
 				ExampleCovidInfo{
 					Symptoms: []string{"cough"},
@@ -265,10 +264,10 @@ func getMockFilter() Filter {
 		Exists: ExampleFilterExists{
 			HasCovidInfo: NewNested(
 				ExampleCovidInfo{
-					HasCovidInfo: ref.Bool(true),
+					HasCovidInfo: ref.Of(true),
 				},
 			),
-			HasAge: ref.Bool(true),
+			HasAge: ref.Of(true),
 		},
 	}
 }
