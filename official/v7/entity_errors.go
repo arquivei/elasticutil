@@ -46,3 +46,7 @@ func fullTextSearchTypeNotSupported(name string) error {
 func multiMatchSearchTypeNotSupported(name string) error {
 	return errors.New("[" + name + "] multi match search value is not supported")
 }
+
+func aggregationTypeNotSupported(t string) error {
+	return errors.New("aggregation type is not supported: " + t)
+}

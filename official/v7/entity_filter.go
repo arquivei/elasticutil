@@ -6,7 +6,7 @@ import (
 	"github.com/arquivei/elasticutil/official/v7/querybuilders"
 )
 
-// Filter is a struct that eill be transformed in a olivere/elastic's query.
+// Filter is a struct that will be transformed in a olivere/elastic's query.
 //
 // "Must" and "MustNot" is for the terms, range and multi match query.
 // "Exists" is for the exists query.
