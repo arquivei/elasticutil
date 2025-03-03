@@ -22,3 +22,40 @@ type RequestBucketAggregation struct {
 	Field         string
 	MetricsSubAgg []RequestMetricAggregation
 }
+
+// ResponseAggregation contains all the aggregations returned from elastic search
+type ResponseAggregation struct {
+	MetricAggregations []ResponseMetricAggregation
+	BucketAggregations []ResponseBucketAggregation
+}
+
+// AppendAggregation adds a parsed aggregation to the appropriate slice
+// in the ResponseAggregation. It handles ResponseMetricAggregation and
+// ResponseBucketAggregation types. If the input 'aggs' is of any other type,
+// it is ignored.
+func (a ResponseAggregation) AppendAggregation(
+	aggs interface{},
+) ResponseAggregation {
+	if metricAggs, ok := aggs.(ResponseMetricAggregation); ok {
+		a.MetricAggregations = append(a.MetricAggregations, metricAggs)
+	} else if bucketAggs, ok := aggs.(ResponseBucketAggregation); ok {
+		a.BucketAggregations = append(a.BucketAggregations, bucketAggs)
+	}
+	return a
+}
+
+type ResponseMetricAggregation struct {
+	Name  string
+	Value any
+}
+
+type ResponseBucketAggregation struct {
+	Name    string
+	Buckets []ResponseBucket
+}
+
+type ResponseBucket struct {
+	Key                 string
+	DocCount            int
+	MetricsAggregations []ResponseMetricAggregation
+}
