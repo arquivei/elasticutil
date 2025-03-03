@@ -18,6 +18,7 @@ type SearchConfig struct {
 	TrackTotalHits    bool
 	Sort              Sorters
 	SearchAfter       string
+	Aggregation       RequestAggregation
 }
 
 func (c *esClient) Search(ctx context.Context, config SearchConfig) (SearchResponse, error) {
@@ -80,7 +81,17 @@ func getQuery(ctx context.Context, config SearchConfig) (string, error) {
 		return "", err
 	}
 
-	queryString := queryWithSearchAfter(query, config.SearchAfter)
+	var aggsQueryString string
+	if hasAggregations(config.Aggregation) {
+		aggs, err := buildElasticAggsQuery(config.Aggregation)
+		if err != nil {
+			return "", err
+		}
+
+		aggsQueryString = marshalQuery(aggs)
+	}
+
+	queryString := queryWithSearchAfter(query, aggsQueryString, config.SearchAfter)
 	enrichLogWithQuery(ctx, queryString)
 	return queryString, nil
 }

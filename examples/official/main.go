@@ -28,6 +28,7 @@ func main() {
 				},
 			},
 			SearchAfter: "",
+			Aggregation: createAggregations(),
 		},
 	)
 

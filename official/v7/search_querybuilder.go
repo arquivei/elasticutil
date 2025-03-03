@@ -69,6 +69,76 @@ func buildElasticBoolQuery(filter Filter) (querybuilders.Query, error) {
 	), nil
 }
 
+func buildElasticAggsQuery(aggregation RequestAggregation) (querybuilders.Query, error) {
+	const op = errors.Op("buildElasticAggsQuery")
+
+	aggsQuery := querybuilders.NewAggsQuery()
+
+	metricAggsQueries, err := buildElasticMetricAggsQueries(aggregation.Metrics)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	aggsQuery.Metric(metricAggsQueries...)
+
+	for _, bucketAgg := range aggregation.Buckets {
+		switch bucketAgg.Type {
+		case "term":
+			termsAggQuery := querybuilders.NewBucketTermsAggregation(bucketAgg.Name, bucketAgg.Field)
+
+			subMetricAggsQueries, err := buildElasticMetricAggsQueries(bucketAgg.MetricsSubAgg)
+			if err != nil {
+				return nil, errors.E(op, err)
+			}
+
+			termsAggQuery = termsAggQuery.SubMetrics(subMetricAggsQueries...)
+			aggsQuery.BucketTerms(*termsAggQuery)
+		case "monthlyhistogram":
+			histogramAggQuery := querybuilders.NewBucketHistogramAggregation(
+				bucketAgg.Name,
+				bucketAgg.Field,
+				"month",
+			)
+
+			subMetricAggsQueries, err := buildElasticMetricAggsQueries(bucketAgg.MetricsSubAgg)
+			if err != nil {
+				return nil, errors.E(op, err)
+			}
+
+			histogramAggQuery = histogramAggQuery.SubMetrics(subMetricAggsQueries...)
+			aggsQuery.BucketDateHistogram(*histogramAggQuery)
+		default:
+			return nil, errors.E(op, aggregationTypeNotSupported(bucketAgg.Type))
+		}
+	}
+
+	return aggsQuery, nil
+}
+
+func buildElasticMetricAggsQueries(
+	metricsAggs []RequestMetricAggregation,
+) ([]querybuilders.MetricAggregation, error) {
+	const op = errors.Op("buildElasticMetricAggsQuery")
+
+	metricAggsQueries := make([]querybuilders.MetricAggregation, 0)
+
+	for _, metricAgg := range metricsAggs {
+		switch metricAgg.Type {
+		case "min":
+			metricAggsQueries = append(metricAggsQueries, querybuilders.NewMinAggregation(metricAgg.Name, metricAgg.Field))
+		case "max":
+			metricAggsQueries = append(metricAggsQueries, querybuilders.NewMaxAggregation(metricAgg.Name, metricAgg.Field))
+		case "sum":
+			metricAggsQueries = append(metricAggsQueries, querybuilders.NewSumAggregation(metricAgg.Name, metricAgg.Field))
+		case "count":
+			metricAggsQueries = append(metricAggsQueries, querybuilders.NewCountAggregation(metricAgg.Name, metricAgg.Field))
+		default:
+			return nil, errors.E(op, aggregationTypeNotSupported(metricAgg.Type))
+		}
+	}
+
+	return metricAggsQueries, nil
+}
+
 func marshalQuery(query querybuilders.Query) string {
 	if query != nil {
 		q, e := query.Source()
@@ -481,12 +551,17 @@ func extractSliceFromInterface[T any](input interface{}) []interface{} {
 	return is
 }
 
-func queryWithSearchAfter(q querybuilders.Query, searchAfter string) string {
+func queryWithSearchAfter(q querybuilders.Query, aggs string, searchAfter string) string {
 	var b strings.Builder
 
 	b.WriteString(`{"query":`)
 
 	b.WriteString(marshalQuery(q))
+
+	if len(aggs) > 0 {
+		b.WriteString(", ")
+		b.WriteString(fmt.Sprintf(`	"aggs": %s`, aggs))
+	}
 
 	if len(searchAfter) > 0 {
 		b.WriteString(", ")
@@ -498,4 +573,8 @@ func queryWithSearchAfter(q querybuilders.Query, searchAfter string) string {
 	log.Debug().Str("elastic_query", b.String()).Msg("Elastic query")
 
 	return b.String()
+}
+
+func hasAggregations(aggregation RequestAggregation) bool {
+	return len(aggregation.Buckets) > 0 || len(aggregation.Metrics) > 0
 }

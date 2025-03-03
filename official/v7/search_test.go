@@ -49,13 +49,14 @@ func Test_Search(t *testing.T) {
 					},
 				},
 				SearchAfter: `{"paginator"}`,
+				Aggregation: getMockAggregations(),
 			},
 			transport: func() *mockTransport {
 				server := new(mockTransport)
 				server.On(
 					"RoundTrip",
 					"http://localhost:9200/index1,index2/_search?allow_no_indices=true&ignore_unavailable=true&size=19&sort=Date%3Aasc%2CID%3Adesc&track_total_hits=true",
-					`{"query":{"bool":{"must":[{"terms":{"Name":["John","Mary"]}},{"terms":{"Age":[16,17,18,25,26]}},{"term":{"HasCovid":true}},{"range":{"CreatedAt":{"from":"2020-11-28T15:27:39.000000049Z","include_lower":true,"include_upper":true,"to":"2021-11-28T15:27:39.000000049Z"}}},{"range":{"Age":{"from":15,"include_lower":true,"include_upper":true,"to":30}}},{"range":{"Age":{"from":0.5,"include_lower":true,"include_upper":true,"to":1.9}}},{"nested":{"path":"Covid","query":{"bool":{"must":[{"terms":{"Covid.Symptom":["cough"]}},{"range":{"Covid.Date":{"from":"2019-11-28T15:27:39.000000049Z","include_lower":true,"include_upper":true,"to":"2020-11-28T15:27:39.000000049Z"}}}]}}}},{"bool":{"should":[{"multi_match":{"fields":["Name","SocialName"],"max_expansions":1024,"query":"John","type":"phrase_prefix"}},{"multi_match":{"fields":["Name","SocialName"],"max_expansions":1024,"query":"Mary","type":"phrase_prefix"}},{"multi_match":{"fields":["Name","SocialName"],"max_expansions":1024,"query":"Rebecca","type":"phrase_prefix"}}]}},{"bool":{"must":[{"multi_match":{"fields":["Name","SocialName"],"max_expansions":1024,"query":"Lennon","type":"phrase_prefix"}},{"multi_match":{"fields":["Name","SocialName"],"max_expansions":1024,"query":"McCartney","type":"phrase_prefix"}}]}},{"bool":{"should":[{"multi_match":{"fields":["Any"],"max_expansions":1024,"query":"Beatles","type":"best_fields"}},{"multi_match":{"fields":["Any"],"max_expansions":1024,"query":"Stones","type":"best_fields"}}]}},{"bool":{"must":{"term":{"Name":"John"}}}},{"nested":{"path":"Covid","query":{"exists":{"field":"Covid"}}}},{"exists":{"field":"Age"}}],"must_not":[{"terms":{"Name":["Lary"]}},{"range":{"Age":{"from":29,"include_lower":true,"include_upper":true,"to":30}}}]}}, 	"search_after": {"paginator"}}`,
+					`{"query":{"bool":{"must":[{"terms":{"Name":["John","Mary"]}},{"terms":{"Age":[16,17,18,25,26]}},{"term":{"HasCovid":true}},{"range":{"CreatedAt":{"from":"2020-11-28T15:27:39.000000049Z","include_lower":true,"include_upper":true,"to":"2021-11-28T15:27:39.000000049Z"}}},{"range":{"Age":{"from":15,"include_lower":true,"include_upper":true,"to":30}}},{"range":{"Age":{"from":0.5,"include_lower":true,"include_upper":true,"to":1.9}}},{"nested":{"path":"Covid","query":{"bool":{"must":[{"terms":{"Covid.Symptom":["cough"]}},{"range":{"Covid.Date":{"from":"2019-11-28T15:27:39.000000049Z","include_lower":true,"include_upper":true,"to":"2020-11-28T15:27:39.000000049Z"}}}]}}}},{"bool":{"should":[{"multi_match":{"fields":["Name","SocialName"],"max_expansions":1024,"query":"John","type":"phrase_prefix"}},{"multi_match":{"fields":["Name","SocialName"],"max_expansions":1024,"query":"Mary","type":"phrase_prefix"}},{"multi_match":{"fields":["Name","SocialName"],"max_expansions":1024,"query":"Rebecca","type":"phrase_prefix"}}]}},{"bool":{"must":[{"multi_match":{"fields":["Name","SocialName"],"max_expansions":1024,"query":"Lennon","type":"phrase_prefix"}},{"multi_match":{"fields":["Name","SocialName"],"max_expansions":1024,"query":"McCartney","type":"phrase_prefix"}}]}},{"bool":{"should":[{"multi_match":{"fields":["Any"],"max_expansions":1024,"query":"Beatles","type":"best_fields"}},{"multi_match":{"fields":["Any"],"max_expansions":1024,"query":"Stones","type":"best_fields"}}]}},{"bool":{"must":{"term":{"Name":"John"}}}},{"nested":{"path":"Covid","query":{"exists":{"field":"Covid"}}}},{"exists":{"field":"Age"}}],"must_not":[{"terms":{"Name":["Lary"]}},{"range":{"Age":{"from":29,"include_lower":true,"include_upper":true,"to":30}}}]}}, 	"aggs": {"count_aggregation":{"value_count":{"field":"count_field"}},"max_aggregation_name":{"max":{"field":"max_field"}},"max_aggregation_name_2":{"max":{"field":"max_field_2"}},"min_aggregation_name":{"min":{"field":"min_field"}},"some_histogram_agg":{"aggs":{"max_agg_in_histogram_name":{"max":{"field":"max_in_histogram_field"}},"min_agg_in_histogram_name":{"min":{"field":"min_in_histogram_field"}}},"date_histogram":{"field":"EmissionDate","interval":"month"}},"some_term_agg":{"aggs":{"min_agg_in_term_name":{"min":{"field":"min_in_term_field"}}},"terms":{"field":"CompanyRole","show_term_doc_count_error":true}},"sum_aggregation_name":{"sum":{"field":"sum_field"}}}, 	"search_after": {"paginator"}}`,
 				).Once().Return(
 					`{"took":10,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":2},"max_score":null,"hits":[{"_index":"tiramisu_cte-2022101","_id":"elastic-id-1","_score":null,"sort":["pag2"]},{"_index":"tiramisu_cte-2019","_id":"elastic-id-2","_score":null,"sort":["pag3"]}]}}`,
 					200,
@@ -268,6 +269,69 @@ func getMockFilter() Filter {
 				},
 			),
 			HasAge: ref.Of(true),
+		},
+	}
+}
+
+func getMockAggregations() RequestAggregation {
+	return RequestAggregation{
+		Metrics: []RequestMetricAggregation{
+			{
+				Name:  "sum_aggregation_name",
+				Type:  "sum",
+				Field: "sum_field",
+			},
+			{
+				Name:  "max_aggregation_name",
+				Type:  "max",
+				Field: "max_field",
+			},
+			{
+				Name:  "max_aggregation_name_2",
+				Type:  "max",
+				Field: "max_field_2",
+			},
+			{
+				Name:  "min_aggregation_name",
+				Type:  "min",
+				Field: "min_field",
+			},
+			{
+				Name:  "count_aggregation",
+				Type:  "count",
+				Field: "count_field",
+			},
+		},
+		Buckets: []RequestBucketAggregation{
+			{
+				Name:  "some_term_agg",
+				Field: "CompanyRole",
+				Type:  "term",
+				MetricsSubAgg: []RequestMetricAggregation{
+					{
+						Name:  "min_agg_in_term_name",
+						Field: "min_in_term_field",
+						Type:  "min",
+					},
+				},
+			},
+			{
+				Name:  "some_histogram_agg",
+				Field: "EmissionDate",
+				Type:  "monthlyhistogram",
+				MetricsSubAgg: []RequestMetricAggregation{
+					{
+						Name:  "max_agg_in_histogram_name",
+						Field: "max_in_histogram_field",
+						Type:  "max",
+					},
+					{
+						Name:  "min_agg_in_histogram_name",
+						Field: "min_in_histogram_field",
+						Type:  "min",
+					},
+				},
+			},
 		},
 	}
 }
