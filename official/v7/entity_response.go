@@ -12,10 +12,11 @@ import (
 
 // SearchResponse represents the response for Search method.
 type SearchResponse struct {
-	IDs       []string
-	Paginator string
-	Total     int
-	Took      int
+	IDs          []string
+	Paginator    string
+	Total        int
+	Took         int
+	Aggregations ResponseAggregation
 }
 
 type envelopeResponse struct {
@@ -26,7 +27,8 @@ type envelopeResponse struct {
 		}
 		Hits []*envelopeHits `json:"Hits"`
 	}
-	Shards *shardsInfo `json:"_shards,omitempty"`
+	Shards       *shardsInfo            `json:"_shards,omitempty"`
+	Aggregations map[string]interface{} `json:"aggregations"`
 }
 
 type envelopeHits struct {
@@ -76,6 +78,12 @@ func parseResponse(ctx context.Context, response *esapi.Response) (SearchRespons
 	}
 
 	searchResponse.Paginator = paginator
+
+	searchResponse.Aggregations, err = parseAggregations(r.Aggregations)
+	if err != nil {
+		return SearchResponse{}, errors.E(op, err)
+	}
+
 	return searchResponse, nil
 }
 
@@ -133,7 +141,7 @@ func checkErrorFromResponse(response *esapi.Response) error {
 
 	errorBody, ok := responseBody["error"].(map[string]interface{})
 	if !ok {
-		return errors.New("failed to decode error from response")
+		return errors.E("failed to decode error from response", errors.KV("error", responseBody["error"]))
 	}
 
 	rootCause, ok := errorBody["root_cause"].([]interface{})
@@ -158,4 +166,126 @@ func checkErrorFromResponse(response *esapi.Response) error {
 	}
 
 	return err
+}
+
+func parseAggregations(
+	aggs map[string]interface{},
+) (ResponseAggregation, error) {
+	const op = errors.Op("parseAggregations")
+
+	var responseAggregation ResponseAggregation
+
+	if aggs == nil {
+		return responseAggregation, nil
+	}
+
+	for aggName, aggData := range aggs {
+		parsedAggData, err := parseAggregationData(aggName, aggData)
+		if err != nil {
+			return responseAggregation, errors.E(op, err)
+		}
+
+		responseAggregation = responseAggregation.AppendAggregation(parsedAggData)
+	}
+
+	return responseAggregation, nil
+}
+
+func parseAggregationData(aggName string, aggData interface{}) (interface{}, error) {
+	const op = errors.Op("parseAggregationData")
+
+	aggMap, ok := aggData.(map[string]interface{})
+	if !ok {
+		return nil, errors.E(
+			op,
+			"unexpected type for aggregation data, expected: map[string]interface{}",
+			errors.KV("given", fmt.Sprintf("%T", aggData)),
+		)
+	}
+
+	if value, ok := aggMap["value"]; ok {
+		return ResponseMetricAggregation{
+			Name:  aggName,
+			Value: value,
+		}, nil
+	}
+
+	if buckets, ok := aggMap["buckets"].([]interface{}); ok {
+		bucketAggregation := ResponseBucketAggregation{
+			Name: aggName,
+		}
+
+		for _, bucket := range buckets {
+			bucketMap, ok := bucket.(map[string]interface{})
+			if !ok {
+				return nil, errors.E(
+					op,
+					"unexpected type for bucket aggregation data, expected: map[string]interface{}",
+					errors.KV("given", fmt.Sprintf("%T", bucket)),
+				)
+			}
+
+			responseBucket := ResponseBucket{}
+
+			for name, data := range bucketMap {
+				switch name {
+				case "doc_count":
+					if docCount, ok := data.(float64); ok {
+						responseBucket.DocCount = int(docCount)
+					} else {
+						return nil, errors.E(
+							op,
+							"unexpected type for doc_count field, expected: float64",
+							errors.KV("given", fmt.Sprintf("%T", data)),
+						)
+					}
+				case "key_as_string":
+					if key, ok := data.(string); ok {
+						responseBucket.Key = key
+					} else {
+						return nil, errors.E(
+							op,
+							"unexpected type for key_as_string field, expected: string",
+							errors.KV("given", fmt.Sprintf("%T", data)),
+						)
+					}
+				case "key":
+					if responseBucket.Key == "" {
+						if key, ok := data.(string); ok {
+							responseBucket.Key = key
+						} else if key, ok := data.(float64); ok {
+							responseBucket.Key = fmt.Sprintf("%f", key)
+						} else {
+							return nil, errors.E(
+								op,
+								"unexpected type for key field, expected: string or float64",
+								errors.KV("given", fmt.Sprintf("%T", data)),
+							)
+						}
+					}
+				default:
+					// default case handles sub aggregations inside buckets
+					if _, ok := data.(map[string]interface{}); ok {
+						bucketSubAgg, err := parseAggregationData(name, data)
+						if err != nil {
+							return nil, errors.E(op, err)
+						}
+
+						if bucketMetricSubAgg, ok := bucketSubAgg.(ResponseMetricAggregation); ok {
+							responseBucket.MetricsAggregations = append(
+								responseBucket.MetricsAggregations,
+								bucketMetricSubAgg,
+							)
+						}
+					}
+				}
+			}
+
+			bucketAggregation.Buckets = append(bucketAggregation.Buckets, responseBucket)
+		}
+
+		return bucketAggregation, nil
+	}
+
+	return nil, errors.E(op, "aggregation type is not supported", errors.KV("aggName", aggName))
 }
