@@ -64,6 +64,11 @@ func parseResponse(ctx context.Context, response *esapi.Response) (SearchRespons
 		return searchResponse, errors.E(op, err, ErrCodeBadGateway)
 	}
 
+	searchResponse.Aggregations, err = parseAggregations(r.Aggregations)
+	if err != nil {
+		return SearchResponse{}, errors.E(op, err)
+	}
+
 	if len(r.Hits.Hits) < 1 {
 		return searchResponse, nil
 	}
@@ -78,11 +83,6 @@ func parseResponse(ctx context.Context, response *esapi.Response) (SearchRespons
 	}
 
 	searchResponse.Paginator = paginator
-
-	searchResponse.Aggregations, err = parseAggregations(r.Aggregations)
-	if err != nil {
-		return SearchResponse{}, errors.E(op, err)
-	}
 
 	return searchResponse, nil
 }
