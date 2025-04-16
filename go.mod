@@ -2,14 +2,14 @@ module github.com/arquivei/elasticutil
 
 go 1.22.7
 
-toolchain go1.23.5
+toolchain go1.24.2
 
 require (
 	github.com/arquivei/foundationkit v0.10.2
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/r3labs/diff/v3 v3.0.1
-	github.com/rs/zerolog v1.33.0
+	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.10.0
 )
 
