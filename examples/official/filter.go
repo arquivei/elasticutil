@@ -56,7 +56,7 @@ func createFilter() elasticutil.Filter {
 			NameOrSocialName: elasticutil.NewFullTextSearchShould([]string{"John", "Mary", "Rebecca"}),
 			MyCustomSearch: elasticutil.NewCustomSearch(func() (querybuilders.Query, error) {
 				return querybuilders.NewBoolQuery().Must(querybuilders.NewTermQuery("Name", "John")), nil
-			}),
+			}, []string{"Name:John"}),
 		},
 		MustNot: ExampleFilterMust{
 			Names: []string{"Lary"},

@@ -217,13 +217,13 @@ func getMustQuery(filter interface{}) ([]querybuilders.Query, error) {
 				queries = append(queries, getRangeQuery(v.From, v.To, names[0]))
 			case Nested:
 				var err error
-				queries, err = getMustNestedQuery(v.payload, names[0], queries)
+				queries, err = getMustNestedQuery(v.Payload, names[0], queries)
 				if err != nil {
 					return nil, errors.E(op, err)
 				}
 			case FullTextSearchShould:
 				boolQuery, err := getFullTextSearchShouldQuery(
-					v.payload,
+					v.Payload,
 					structFieldName,
 					names,
 				)
@@ -233,7 +233,7 @@ func getMustQuery(filter interface{}) ([]querybuilders.Query, error) {
 				queries = append(queries, boolQuery)
 			case FullTextSearchMust:
 				boolQuery, err := getFullTextSearchMustQuery(
-					v.payload,
+					v.Payload,
 					structFieldName,
 					names,
 				)
@@ -243,7 +243,7 @@ func getMustQuery(filter interface{}) ([]querybuilders.Query, error) {
 				queries = append(queries, boolQuery)
 			case MultiMatchSearchShould:
 				boolQuery, err := getMultiMatchSearchShouldQuery(
-					v.payload,
+					v.Payload,
 					structFieldName,
 					names,
 				)
@@ -317,7 +317,7 @@ func getExistsQuery(
 			case Nested:
 				var err error
 				existsQueries, notExistsQueries, err = getExistsNestedQuery(
-					v.payload,
+					v.Payload,
 					names[0],
 					existsQueries,
 					notExistsQueries,

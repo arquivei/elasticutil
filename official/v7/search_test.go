@@ -253,7 +253,7 @@ func getMockFilter() Filter {
 			Any:               NewMultiMatchSearchShould([]string{"Beatles", "Stones"}),
 			MyCustomSearch: NewCustomSearch(func() (querybuilders.Query, error) {
 				return querybuilders.NewBoolQuery().Must(querybuilders.NewTermQuery("Name", "John")), nil
-			}),
+			}, "payload"),
 		},
 		MustNot: ExampleFilterMust{
 			Names: []string{"Lary"},
