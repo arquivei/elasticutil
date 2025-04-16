@@ -1,6 +1,7 @@
 package v7
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/arquivei/elasticutil/official/v7/querybuilders"
@@ -12,9 +13,9 @@ import (
 // "Exists" is for the exists query.
 // For nested queries, uses the Nested type.
 type Filter struct {
-	Must    interface{}
-	MustNot interface{}
-	Exists  interface{}
+	Must    any
+	MustNot any
+	Exists  any
 }
 
 // Ranges is an interface that represents one of the following range type:
@@ -43,53 +44,74 @@ type FloatRange struct {
 
 // Nested represents a nested query.
 type Nested struct {
-	payload interface{}
+	Payload any
 }
 
 // NewNested creates a Nested struct with the given payload.
-func NewNested(payload interface{}) Nested {
+func NewNested(payload any) Nested {
 	return Nested{payload}
 }
 
-// FullTextSearchMust Represents a Must's Full Text Search.
+func (m Nested) MarshalJSON() ([]byte, error) {
+	return json.Marshal(m.Payload)
+}
+
+// FullTextSearchMust represents a Must's Full Text Search.
 type FullTextSearchMust struct {
-	payload interface{}
+	Payload any
 }
 
 // NewFullTextSearchMust creates a FullTextSearchMust struct with the given payload.
-func NewFullTextSearchMust(payload interface{}) FullTextSearchMust {
+func NewFullTextSearchMust(payload any) FullTextSearchMust {
 	return FullTextSearchMust{payload}
 }
 
-// FullTextSearchMust Represents a Should's Full Text Search.
+func (m FullTextSearchMust) MarshalJSON() ([]byte, error) {
+	return json.Marshal(m.Payload)
+}
+
+// FullTextSearchShould represents a Should's Full Text Search.
 type FullTextSearchShould struct {
-	payload interface{}
+	Payload any
 }
 
 // NewFullTextSearchShould creates a FullTextSearchShould struct with the given payload.
-func NewFullTextSearchShould(payload interface{}) FullTextSearchShould {
+func NewFullTextSearchShould(payload any) FullTextSearchShould {
 	return FullTextSearchShould{payload}
 }
 
 // CustomSearch is the struct that contains the CustomQuery function.
 type CustomSearch struct {
 	GetQuery CustomQuery
+	Payload  any
 }
 
 // CustomQuery is the type function that will return the custom query.
 type CustomQuery func() (querybuilders.Query, error)
 
-// NewCustomSearch creates a CustomSearch struct with the given CustomQuery function.
-func NewCustomSearch(query CustomQuery) CustomSearch {
-	return CustomSearch{query}
+// NewCustomSearch creates a new CustomSearch instance with the provided query and payload.
+// The @payload is any serializable data that will be used for custom JSON marshaling.
+func NewCustomSearch(query CustomQuery, payload any) CustomSearch {
+	return CustomSearch{
+		GetQuery: query,
+		Payload:  payload,
+	}
+}
+
+func (m CustomSearch) MarshalJSON() ([]byte, error) {
+	return json.Marshal(m.Payload)
 }
 
 // MultiMatchSearchShould Represents a Should's Multi Match Search.
 type MultiMatchSearchShould struct {
-	payload interface{}
+	Payload any
 }
 
 // NewMultiMatchSearchShould creates a MultiMatchSearchShould struct with the given payload.
-func NewMultiMatchSearchShould(payload interface{}) MultiMatchSearchShould {
+func NewMultiMatchSearchShould(payload any) MultiMatchSearchShould {
 	return MultiMatchSearchShould{payload}
+}
+
+func (m MultiMatchSearchShould) MarshalJSON() ([]byte, error) {
+	return json.Marshal(m.Payload)
 }
