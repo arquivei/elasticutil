@@ -33,6 +33,8 @@ func enrichLogWithShards(ctx context.Context, shards int) {
 	log.Ctx(ctx).UpdateContext(func(zc zerolog.Context) zerolog.Context {
 		return zc.Int("elastic_shards", shards)
 	})
+
+	contextmap.Ctx(ctx).Set("elastic_shards", shards)
 }
 
 func truncate(str string, size int) string {
