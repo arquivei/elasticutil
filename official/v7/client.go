@@ -2,6 +2,8 @@ package v7
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"net/http"
 
 	"github.com/arquivei/elasticutil/official/v7/internal/retrier"
@@ -29,6 +31,33 @@ func NewClient(urls ...string) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return &esClient{
+		client: client,
+	}, nil
+}
+
+// NewClient returns a new Client using the @urls and some auth parameters.
+func NewClientWithAuth(urls []string, certPem []byte, username, password string) (Client, error) {
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(certPem)
+
+	client, err := es.NewClient(es.Config{
+		Addresses:    urls,
+		Username:     username,
+		Password:     password,
+		RetryBackoff: retrier.NewSimpleBackoff(10, 100),
+		Transport: &http.Transport{
+			DisableCompression: false,
+			TLSClientConfig: &tls.Config{
+				RootCAs: caCertPool,
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &esClient{
 		client: client,
 	}, nil
@@ -41,5 +70,17 @@ func MustNewClient(urls ...string) Client {
 	if err != nil {
 		panic(err)
 	}
+
+	return client
+}
+
+// MustNewClientWithAuth returns a new Client using the @urls and some auth parameters.
+// It panics instead of returning an error.
+func MustNewClientWithAuth(urls []string, certPem []byte, username, password string) Client {
+	client, err := NewClientWithAuth(urls, certPem, username, password)
+	if err != nil {
+		panic(err)
+	}
+
 	return client
 }
