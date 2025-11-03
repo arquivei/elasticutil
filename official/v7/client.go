@@ -37,7 +37,7 @@ func NewClient(urls ...string) (Client, error) {
 	}, nil
 }
 
-// NewClient returns a new Client using the @urls and some auth parameters.
+// NewClientWithAuth returns a new Client using the @urls and some auth parameters.
 func NewClientWithAuth(urls []string, certPem []byte, username, password string) (Client, error) {
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(certPem)
