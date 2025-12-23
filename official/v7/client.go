@@ -38,22 +38,9 @@ func NewClient(urls ...string) (Client, error) {
 }
 
 // NewClientWithAuth returns a new Client using the @urls and some auth parameters.
+// If @certPem is nil, it will try to create a client without authentication.
 func NewClientWithAuth(urls []string, certPem []byte, username, password string) (Client, error) {
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(certPem)
-
-	client, err := es.NewClient(es.Config{
-		Addresses:    urls,
-		Username:     username,
-		Password:     password,
-		RetryBackoff: retrier.NewSimpleBackoff(10, 100),
-		Transport: &http.Transport{
-			DisableCompression: false,
-			TLSClientConfig: &tls.Config{
-				RootCAs: caCertPool,
-			},
-		},
-	})
+	client, err := es.NewClient(getElasticAuthConfig(urls, certPem, username, password))
 	if err != nil {
 		return nil, err
 	}
@@ -61,6 +48,38 @@ func NewClientWithAuth(urls []string, certPem []byte, username, password string)
 	return &esClient{
 		client: client,
 	}, nil
+}
+
+func getElasticAuthConfig(urls []string, certPem []byte, username, password string) es.Config {
+	esConfig := es.Config{
+		Addresses:    urls,
+		Username:     username,
+		Password:     password,
+		RetryBackoff: retrier.NewSimpleBackoff(10, 100),
+	}
+
+	if certPem == nil {
+		esConfig.Transport = &http.Transport{
+			DisableCompression: false,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+
+		return esConfig
+	}
+
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(certPem)
+
+	esConfig.Transport = &http.Transport{
+		DisableCompression: false,
+		TLSClientConfig: &tls.Config{
+			RootCAs: caCertPool,
+		},
+	}
+
+	return esConfig
 }
 
 // MustNewClient returns a new Client using the @urls. It panics
