@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/arquivei/elasticutil/official/v7/internal/retrier"
-	es "github.com/elastic/go-elasticsearch/v7"
+	es "github.com/elastic/go-elasticsearch/v9"
 )
 
 // Client represents the Elasticsearch's client of the official lib.
