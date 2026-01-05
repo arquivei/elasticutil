@@ -58,7 +58,7 @@ func getElasticAuthConfig(urls []string, certPem []byte, username, password stri
 		RetryBackoff: retrier.NewSimpleBackoff(10, 100),
 	}
 
-	if certPem == nil {
+	if len(certPem) == 0 {
 		esConfig.Transport = &http.Transport{
 			DisableCompression: false,
 			TLSClientConfig: &tls.Config{
