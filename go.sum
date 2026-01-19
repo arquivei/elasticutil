@@ -1,5 +1,5 @@
-github.com/arquivei/foundationkit v0.10.3 h1:glQrvAleZwP5G+puJ1xZfUAnM6RWc2Zb4Tnl/umrmSE=
-github.com/arquivei/foundationkit v0.10.3/go.mod h1:cd4xI4bBDyn6ZuMquvk5oTTzBf8vMgLv+Mde5txwzb4=
+github.com/arquivei/foundationkit v0.10.4 h1:DS+Bhc7tHMbkPHtvSJmBIKVtDmSnAxj3CmhWAzMCEAE=
+github.com/arquivei/foundationkit v0.10.4/go.mod h1:NqbAcbNkGx09lNnp5WAnOqHUM/n1BtDN8QBm+PDcXyE=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
