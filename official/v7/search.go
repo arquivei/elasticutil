@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/arquivei/foundationkit/errors"
-	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"github.com/elastic/go-elasticsearch/v9/esapi"
 )
 
 // SearchConfig hold all information to Search method.
