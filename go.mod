@@ -2,10 +2,10 @@ module github.com/arquivei/elasticutil
 
 go 1.25
 
-toolchain go1.25.5
+toolchain go1.25.7
 
 require (
-	github.com/arquivei/foundationkit v0.10.3
+	github.com/arquivei/foundationkit v0.10.4
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/r3labs/diff/v3 v3.0.2
