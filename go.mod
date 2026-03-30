@@ -9,7 +9,7 @@ require (
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/r3labs/diff/v3 v3.0.2
-	github.com/rs/zerolog v1.34.0
+	github.com/rs/zerolog v1.35.0
 	github.com/stretchr/testify v1.11.1
 )
 
