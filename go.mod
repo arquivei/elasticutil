@@ -1,11 +1,11 @@
 module github.com/arquivei/elasticutil
 
-go 1.25
+go 1.25.0
 
-toolchain go1.26.3
+toolchain go1.26.4
 
 require (
-	github.com/arquivei/foundationkit v0.10.4
+	github.com/arquivei/foundationkit v0.10.5
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/r3labs/diff/v3 v3.0.2
@@ -25,6 +25,6 @@ require (
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
