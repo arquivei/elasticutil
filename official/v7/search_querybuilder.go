@@ -84,6 +84,9 @@ func buildElasticAggsQuery(aggregation RequestAggregation) (querybuilders.Query,
 		switch bucketAgg.Type {
 		case "term":
 			termsAggQuery := querybuilders.NewBucketTermsAggregation(bucketAgg.Name, bucketAgg.Field)
+			if bucketAgg.Size > 0 {
+				termsAggQuery = termsAggQuery.Size(bucketAgg.Size)
+			}
 
 			subMetricAggsQueries, err := buildElasticMetricAggsQueries(bucketAgg.MetricsSubAgg)
 			if err != nil {
