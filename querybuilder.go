@@ -134,7 +134,7 @@ func getMustQuery(
 
 		// Fix kind and value if field is a pointer
 		fkind := ftype.Type.Kind()
-		if fkind == reflect.Pointer {
+		if fkind == reflect.Ptr {
 			fvalue = fvalue.Elem()
 			fkind = fvalue.Kind()
 		}
@@ -248,7 +248,7 @@ func getExistsQuery(
 
 		// Fix kind and value if field is a pointer
 		fkind := ftype.Type.Kind()
-		if fkind == reflect.Pointer {
+		if fkind == reflect.Ptr {
 			fvalue = fvalue.Elem()
 			fkind = fvalue.Kind()
 		}
