@@ -189,7 +189,7 @@ func getMustQuery(filter interface{}) ([]querybuilders.Query, error) {
 
 		// Fix kind and value if field is a pointer
 		fkind := ftype.Type.Kind()
-		if fkind == reflect.Ptr {
+		if fkind == reflect.Pointer {
 			fvalue = fvalue.Elem()
 			fkind = fvalue.Kind()
 		}
@@ -303,7 +303,7 @@ func getExistsQuery(
 
 		// Fix kind and value if field is a pointer
 		fkind := ftype.Type.Kind()
-		if fkind == reflect.Ptr {
+		if fkind == reflect.Pointer {
 			fvalue = fvalue.Elem()
 			fkind = fvalue.Kind()
 		}
@@ -563,12 +563,12 @@ func queryWithSearchAfter(q querybuilders.Query, aggs string, searchAfter string
 
 	if len(aggs) > 0 {
 		b.WriteString(", ")
-		b.WriteString(fmt.Sprintf(`	"aggs": %s`, aggs))
+		fmt.Fprintf(&b, `	"aggs": %s`, aggs)
 	}
 
 	if len(searchAfter) > 0 {
 		b.WriteString(", ")
-		b.WriteString(fmt.Sprintf(`	"search_after": %s`, searchAfter))
+		fmt.Fprintf(&b, `	"search_after": %s`, searchAfter)
 	}
 
 	b.WriteString("}")

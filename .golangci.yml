@@ -23,6 +23,10 @@ linters:
       - common-false-positives
       - legacy
       - std-error-handling
+    rules:
+      - linters:
+          - goconst
+        path: (_test\.go$|^examples/)
     paths:
       - third_party$
       - builtin$
