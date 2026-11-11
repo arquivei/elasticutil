@@ -17,9 +17,13 @@ type RequestMetricAggregation struct {
 // RequestBucketAggregation is a aggregation that groups documents using either a histogram or a terms search.
 // It can contains a metrics aggregation that will compute metrics over all documents inside a bucket
 type RequestBucketAggregation struct {
-	Name          string
-	Type          string
-	Field         string
+	Name  string
+	Type  string
+	Field string
+	// Size is the maximum number of buckets returned by a "term" aggregation.
+	// When zero or negative, the elasticsearch default (10) is used.
+	// It is ignored by the other bucket aggregation types.
+	Size          int
 	MetricsSubAgg []RequestMetricAggregation
 }
 

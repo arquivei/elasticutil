@@ -16,6 +16,12 @@ linters:
     - staticcheck
     - unconvert
     - unparam
+  settings:
+    govet:
+      disable:
+        # Avoids touching reflect.Ptr inside code blocks duplicated between
+        # querybuilder.go and official/v7, which fails Sonar's duplication gate.
+        - inline
   exclusions:
     generated: lax
     presets:
@@ -23,6 +29,10 @@ linters:
       - common-false-positives
       - legacy
       - std-error-handling
+    rules:
+      - linters:
+          - goconst
+        path: (_test\.go$|^examples/)
     paths:
       - third_party$
       - builtin$

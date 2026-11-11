@@ -84,6 +84,9 @@ func buildElasticAggsQuery(aggregation RequestAggregation) (querybuilders.Query,
 		switch bucketAgg.Type {
 		case "term":
 			termsAggQuery := querybuilders.NewBucketTermsAggregation(bucketAgg.Name, bucketAgg.Field)
+			if bucketAgg.Size > 0 {
+				termsAggQuery = termsAggQuery.Size(bucketAgg.Size)
+			}
 
 			subMetricAggsQueries, err := buildElasticMetricAggsQueries(bucketAgg.MetricsSubAgg)
 			if err != nil {
@@ -560,12 +563,12 @@ func queryWithSearchAfter(q querybuilders.Query, aggs string, searchAfter string
 
 	if len(aggs) > 0 {
 		b.WriteString(", ")
-		b.WriteString(fmt.Sprintf(`	"aggs": %s`, aggs))
+		fmt.Fprintf(&b, `	"aggs": %s`, aggs)
 	}
 
 	if len(searchAfter) > 0 {
 		b.WriteString(", ")
-		b.WriteString(fmt.Sprintf(`	"search_after": %s`, searchAfter))
+		fmt.Fprintf(&b, `	"search_after": %s`, searchAfter)
 	}
 
 	b.WriteString("}")
