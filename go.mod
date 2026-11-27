@@ -5,7 +5,7 @@ go 1.27
 toolchain go1.27.4
 
 require (
-	github.com/arquivei/foundationkit v0.14.1
+	github.com/arquivei/foundationkit v0.14.2
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/r3labs/diff/v3 v3.0.2
